@@ -1,63 +1,104 @@
 import React from 'react';
-import { View, Text, StyleSheet, Linking } from 'react-native';
+import { View, Text, StyleSheet, Linking, TouchableOpacity, Image } from 'react-native';
+
+// Importa la imagen del ícono de Facebook desde tu proyecto
+import facebookIcon from '../assets/face.png'; // Ajusta la ruta según la ubicación de tu imagen
 
 const ContactInfo = () => {
+  const handlePhoneCall = () => {
+    Linking.openURL('tel:7223192737');
+  };
+
+  const handleWhatsAppChat = () => {
+    Linking.openURL('whatsapp://send?phone=5542045241');
+  };
+
   const handleFacebookLink = () => {
-    Linking.openURL('https://facebook.com/empresa');
+    Linking.openURL('https://www.facebook.com/profile.php?id=100089416552581');
+  };
+
+  const handleEmail = () => {
+    Linking.openURL('mailto:joel.velasco.cbamexico@gmail.com');
+  };
+
+  const handleWebsite = () => {
+    Linking.openURL('https://cbamexico.com/');
   };
 
   return (
-    <View style={styles.container}>
+    <View>
       <Text style={styles.title}>Contactos</Text>
-      <View style={styles.infoContainer}>
-        <Text style={styles.label}>Teléfono:</Text>
-        <Text style={styles.text}>123-456-789</Text>
-      </View>
-      <View style={styles.infoContainer}>
-        <Text style={styles.label}>Facebook:</Text>
-        <Text style={[styles.text, styles.link]} onPress={handleFacebookLink}>
-          facebook.com/empresa
-        </Text>
-      </View>
+
+      <TouchableOpacity style={styles.infoContainer} onPress={handlePhoneCall}>
+        <Text style={styles.name}>Teléfono Fijo:</Text>
+        <Text style={styles.detail}>7223192737</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.infoContainer} onPress={handleWhatsAppChat}>
+        <Text style={styles.name}>WhatsApp:</Text>
+        <Text style={styles.detail}>55 420 45 241</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.infoContainer} onPress={handleEmail}>
+        <Text style={styles.name}>Correo:</Text>
+        <Text style={styles.detail}>joel.velasco.cbamexico@gmail.com</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.infoContainer} onPress={handleFacebookLink}>
+        <Text style={styles.name}>Facebook:</Text>
+        <View style={styles.linkContainer}>
+          <Image source={facebookIcon} style={styles.icon} />
+          <Text style={[styles.detail, styles.link]}>Visitar perfil</Text>
+        </View>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.infoContainer} onPress={handleWebsite}>
+        <Text style={styles.name}>Sitio Web:</Text>
+        <Text style={[styles.detail, styles.link]}>cbamexico.com</Text>
+      </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    marginTop: 20,
-    padding: 16,
-    backgroundColor: '#FFF',
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
   title: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: '#333', // Darker text color
+    color: '#333',
     textAlign: 'center',
   },
   infoContainer: {
-    flexDirection: 'row',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'flex-start',
     marginBottom: 8,
+    paddingLeft: 16,
+    paddingRight: 16,
   },
-  label: {
+  name: {
     fontWeight: 'bold',
-    marginRight: 5,
-    color: '#555', // Slightly darker text color
+    fontSize: 14,
+    color: '#555',
+    marginBottom: 2,
   },
-  text: {
-    fontSize: 16,
-    color: '#555', // Slightly darker text color
+  detail: {
+    fontSize: 14,
+    color: '#555',
+  },
+  linkContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   link: {
-    color: '#007bff', // Facebook blue color
+    color: '#007bff',
     textDecorationLine: 'underline',
+    marginLeft: 5,
+  },
+  icon: {
+    width: 16,
+    height: 16,
+    marginRight: 5,
   },
 });
 

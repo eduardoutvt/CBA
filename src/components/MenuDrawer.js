@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Linking } from 'react-native';
+import ContactInfo from './ContactInfo'; // Importamos el componente ContactInfo
 
 const MenuDrawer = ({ isVisible, onClose, navigation }) => {
   if (!isVisible) return null;
@@ -8,11 +9,6 @@ const MenuDrawer = ({ isVisible, onClose, navigation }) => {
     navigation.navigate('Chat');
     onClose();
   };
-
-  const handleFacebookLink = () => {
-    Linking.openURL('https://facebook.com/empresa');
-  };
-
   return (
     <TouchableOpacity style={styles.overlay} onPress={onClose}>
       <View style={styles.drawer}>
@@ -23,17 +19,8 @@ const MenuDrawer = ({ isVisible, onClose, navigation }) => {
           </TouchableOpacity>
         </View>
         <View style={styles.section}>
-          <Text style={styles.title}>Contactos</Text>
-          <View style={styles.infoContainer}>
-            <Text style={styles.label}>Teléfono:</Text>
-            <Text style={styles.text}>123-456-789</Text>
-          </View>
-          <View style={styles.infoContainer}>
-            <Text style={styles.label}>Facebook:</Text>
-            <TouchableOpacity onPress={handleFacebookLink}>
-              <Text style={[styles.text, styles.link]}>facebook.com/empresa</Text>
-            </TouchableOpacity>
-          </View>
+          {/* Integramos el componente ContactInfo aquí */}
+          <ContactInfo />
         </View>
         <View style={styles.section}>
           <TouchableOpacity style={styles.chatButton} onPress={handleChatNavigation}>
@@ -96,32 +83,8 @@ const styles = StyleSheet.create({
   section: {
     marginBottom: 20,
   },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#000',
-  },
-  infoContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  label: {
-    fontWeight: 'bold',
-    marginRight: 5,
-    color: '#000',
-  },
-  text: {
-    fontSize: 16,
-    color: '#000',
-  },
-  link: {
-    color: '#ff0000',
-    textDecorationLine: 'underline',
-  },
   chatButton: {
-    backgroundColor: '#ff5722',
+    backgroundColor: '#0087D1',
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',

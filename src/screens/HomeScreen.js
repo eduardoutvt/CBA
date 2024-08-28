@@ -1,38 +1,40 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, Image, StyleSheet, FlatList, TouchableOpacity, TextInput, Alert, ScrollView, Animated } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Image, StyleSheet, FlatList, TouchableOpacity, TextInput, Alert, ScrollView } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import ServiceCard from '../components/ServiceCard';
 import MenuDrawer from '../components/MenuDrawer';
-import services from '../services/Services'; // Importar el archivo services.js
+import ProductCRUD from '../components/ProductCruds';
+import services from '../services/Services';
 
-const HomeScreen = ({ navigation }) => {
+const HomeScreen = ({ route, isAdmin, isLoggedIn, onLogout }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredServices, setFilteredServices] = useState([]);
   const [isMenuVisible, setIsMenuVisible] = useState(false);
-  const [expandedService, setExpandedService] = useState(null); // Estado para controlar el servicio expandido
+  const [expandedService, setExpandedService] = useState(null);
+  const navigation = useNavigation();
 
-  const scrollX = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (route.params?.role) {
+      setIsAdmin(route.params.role === 'admin');
+      setIsLoggedIn(true);
+    }
+  }, [route.params?.role]);
 
-  const navigateToLogin = () => {
-    navigation.navigate('Login');
-  };
-
-  const navigateToChat = () => {
-    navigation.navigate('Chat');
-  };
-
-  const navigateToServiceDetails = (service) => {
-    navigation.navigate('ServiceDetails', { service });
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setIsAdmin(false);
+    onLogout(); // Llamar a la función de manejo de cierre de sesión
   };
 
   const handleSearch = () => {
-    const filtered = services.filter(service =>
+    const filtered = services.filter((service) =>
       service.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
     setFilteredServices(filtered);
     if (filtered.length === 0) {
       Alert.alert(
         'Servicio no encontrado',
-        `Lo sentimos, no tenemos el servicio '${searchQuery}'. ¿Desea chatear con uno de nuestros agentes para obtener ayuda?`,
+        `Lo sentimos, no tenemos el servicio o producto '${searchQuery}'. ¿Desea chatear con uno de nuestros agentes para obtener ayuda?`,
         [
           {
             text: 'Cancelar',
@@ -56,32 +58,54 @@ const HomeScreen = ({ navigation }) => {
     setExpandedService(expandedService === serviceId ? null : serviceId);
   };
 
+  const navigateToProducts = () => {
+    navigation.navigate('Products');
+  };
+
+  const navigateToProfile = () => {
+    navigation.navigate('Profile');
+  };
+
+  const navigateToAdmin = () => {
+    navigation.navigate('Admin');
+  };
+
   return (
     <View style={styles.container}>
-      {/* Fondo de pantalla */}
       <Image source={require('../assets/fondo.jpg')} style={styles.backgroundImage} />
 
       <View style={styles.header}>
         <TouchableOpacity style={styles.menuIcon} onPress={toggleMenu}>
-          <Image source={{ uri: 'https://img.icons8.com/ios-filled/50/000000/menu.png' }} style={styles.icon} />
+          <Image
+            source={{ uri: 'https://img.icons8.com/ios-filled/50/000000/menu.png' }}
+            style={styles.icon}
+          />
         </TouchableOpacity>
+        {isLoggedIn && (
+          <TouchableOpacity onPress={handleLogout}>
+            <Text style={styles.headerButtonText}>Cerrar Sesión</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
-      <ScrollView>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
         <View style={styles.welcomeContainer}>
-          <Text style={styles.welcomeText}>Bienvenido a Servicios CBA</Text>
+          <Text style={styles.welcomeText}>Cover All Industrias S.A De C.V</Text>
         </View>
 
         <View style={styles.searchContainer}>
           <TextInput
             style={styles.input}
-            placeholder="Buscar servicio..."
+            placeholder="Buscar servicio o productos..."
             placeholderTextColor="#888"
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
           <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-            <Image source={{ uri: 'https://img.icons8.com/ios-filled/50/000000/search--v1.png' }} style={styles.searchIcon} />
+            <Image
+              source={{ uri: 'https://img.icons8.com/ios-filled/50/000000/search--v1.png' }}
+              style={styles.searchIcon}
+            />
           </TouchableOpacity>
         </View>
 
@@ -100,37 +124,32 @@ const HomeScreen = ({ navigation }) => {
           </ScrollView>
         </View>
 
+        <Text style={styles.sectionTitle}>¡Nuestros Productos!</Text>
+        <TouchableOpacity style={styles.productsButton} onPress={navigateToProducts}>
+          <Text style={styles.productsButtonText}>Ver Productos</Text>
+        </TouchableOpacity>
+
+        {isAdmin && (
+          <View style={styles.adminContainer}>
+            <ProductCRUD />
+          </View>
+        )}
+
         <Text style={styles.sectionTitle}>¡Nuestros Servicios!</Text>
-        <FlatList
-          data={searchQuery.length > 0 ? filteredServices : services}
-          renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => toggleServiceDescription(item.id)}>
+        <View style={styles.servicesList}>
+          {(searchQuery.length > 0 ? filteredServices : services).map((item) => (
+            <TouchableOpacity key={item.id} onPress={() => toggleServiceDescription(item.id)}>
               <ServiceCard service={item} isExpanded={expandedService === item.id} />
             </TouchableOpacity>
-          )}
-          keyExtractor={(item) => item.id.toString()}
-          contentContainerStyle={styles.servicesList}
-          numColumns={2} // Muestra los elementos en 2 columnas
-          key={(searchQuery.length > 0 ? 'filtered' : 'all')} // Cambia la clave para forzar la renderización
-        />
+          ))}
+        </View>
       </ScrollView>
 
-      <MenuDrawer isVisible={isMenuVisible} onClose={toggleMenu} navigation={navigation} />
-
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.footerButton} onPress={() => navigation.navigate('Home')}>
-          <Image source={{ uri: 'https://img.icons8.com/ios-filled/50/000000/home.png' }} style={styles.icon} />
-          <Text style={styles.footerButtonText}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.footerButton} onPress={navigateToChat}>
-          <Image source={{ uri: 'https://img.icons8.com/ios-filled/50/000000/chat.png' }} style={styles.icon} />
-          <Text style={styles.footerButtonText}>Chat</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.footerButton} onPress={navigateToLogin}>
-          <Image source={{ uri: 'https://img.icons8.com/ios-filled/50/000000/user.png' }} style={styles.icon} />
-          <Text style={styles.footerButtonText}>Profile</Text>
-        </TouchableOpacity>
-      </View>
+      {isMenuVisible && (
+        <View style={styles.menuDrawerContainer}>
+          <MenuDrawer isVisible={isMenuVisible} onClose={toggleMenu} navigation={navigation} />
+        </View>
+      )}
     </View>
   );
 };
@@ -165,7 +184,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   welcomeText: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: 'bold',
     textAlign: 'center',
     color: '#007bff',
@@ -222,22 +241,42 @@ const styles = StyleSheet.create({
   servicesList: {
     justifyContent: 'center',
     alignItems: 'center',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     paddingHorizontal: 10,
   },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: 10,
-    borderTopWidth: 1,
-    borderColor: '#ddd',
+  productsButton: {
     backgroundColor: '#007bff',
-  },
-  footerButton: {
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     alignItems: 'center',
+    alignSelf: 'center',
+    marginBottom: 20,
   },
-  footerButtonText: {
-    fontSize: 12,
+  productsButtonText: {
     color: '#fff',
+    fontWeight: 'bold',
+  },
+  adminContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 100, // Ajusta según sea necesario
+  },
+  menuDrawerContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

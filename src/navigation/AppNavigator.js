@@ -1,11 +1,17 @@
-import React from 'react';
+// src/navigation/AppNavigator.js
+
+import React, { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import HomeScreen from '../screens/HomeScreen';
-import AdminScreen from '../screens/AdminScreen';
 import LoginScreen from '../screens/LoginScreen';
 import ChatScreen from '../screens/ChatScreen';
+import ProductScreen from '../screens/ProductScreen';
+import ProfileScreen from '../screens/ProfileScreen';
+import ProductCRUD from '../components/ProductCruds';
+import ProductDetailScreen from '../screens/ProductDetailScreen';
+import ScreenWrapper from '../components/ScreenWrapper';
 
 const Stack = createStackNavigator();
 
@@ -15,18 +21,28 @@ const LogoTitle = () => {
       <Image
         source={require('../assets/logo.jpg')}
         style={styles.logo}
-        resizeMode='contain'
+        resizeMode="contain"
       />
-      <Text style={styles.titleText}>INICIO</Text>
+      <Text style={styles.titleText}>Bienvenido</Text>
     </View>
   );
 };
 
 const AppNavigator = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+  };
+
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="Home"
+        initialRouteName={isAuthenticated ? 'Profile' : 'Home'}
         screenOptions={{
           headerStyle: {
             backgroundColor: '#007bff',
@@ -39,26 +55,74 @@ const AppNavigator = () => {
       >
         <Stack.Screen
           name="Home"
-          component={HomeScreen}
-          options={{
-            headerTitle: () => <LogoTitle />,
-            headerTitleAlign: 'center',
-          }}
-        />
-        <Stack.Screen
-          name="Admin"
-          component={AdminScreen}
-          options={{ title: 'Administración' }}
-        />
+          options={({ navigation }) => ({
+            headerTitle: props => <LogoTitle {...props} />,
+            headerRight: () => isAuthenticated ? (
+              <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+                <Text style={styles.headerButtonText}>Perfil</Text>
+              </TouchableOpacity>
+            ) : null,
+          })}
+        >
+          {(props) => (
+            <ScreenWrapper>
+              <HomeScreen {...props} />
+            </ScreenWrapper>
+          )}
+        </Stack.Screen>
         <Stack.Screen
           name="Login"
-          component={LoginScreen}
-          options={{ title: 'Iniciar Sesión' }}
-        />
+        >
+          {(props) => (
+            <ScreenWrapper>
+              <LoginScreen {...props} onLogin={handleLogin} />
+            </ScreenWrapper>
+          )}
+        </Stack.Screen>
         <Stack.Screen
           name="Chat"
-          component={ChatScreen}
           options={{ title: 'Chat' }}
+        >
+          {(props) => (
+            <ScreenWrapper>
+              <ChatScreen {...props} />
+            </ScreenWrapper>
+          )}
+        </Stack.Screen>
+        <Stack.Screen
+          name="Products"
+          options={{ title: 'Productos' }}
+        >
+          {(props) => (
+            <ScreenWrapper>
+              <ProductScreen {...props} />
+            </ScreenWrapper>
+          )}
+        </Stack.Screen>
+        <Stack.Screen
+          name="ProductCRUD"
+          options={{ title: 'Gestión de Productos' }}
+        >
+          {(props) => (
+            <ScreenWrapper>
+              <ProductCRUD {...props} />
+            </ScreenWrapper>
+          )}
+        </Stack.Screen>
+        <Stack.Screen
+          name="Profile"
+          options={{ title: 'Perfil' }}
+        >
+          {(props) => (
+            <ScreenWrapper>
+              <ProfileScreen {...props} onLogout={handleLogout} />
+            </ScreenWrapper>
+          )}
+        </Stack.Screen>
+        <Stack.Screen
+          name="ProductDetail"
+          component={ProductDetailScreen}
+          options={{ title: 'Detalles del Producto' }}
         />
       </Stack.Navigator>
     </NavigationContainer>
@@ -74,9 +138,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   logo: {
-    width: 60, // Aumenta el tamaño del logo
-    height: 60, // Aumenta el tamaño del logo
-    borderRadius: 30, // Ajuste el radio para hacer los bordes redondos
+    width: 60,
+    height: 60,
+    borderRadius: 30,
   },
   titleText: {
     fontSize: 20,
@@ -84,7 +148,12 @@ const styles = StyleSheet.create({
     color: '#fff',
     flex: 1,
     textAlign: 'center',
-    marginLeft: -60, // Ajusta el margen para centrar el texto
+    marginLeft: -60,
+  },
+  headerButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    marginRight: 2,
   },
 });
 
